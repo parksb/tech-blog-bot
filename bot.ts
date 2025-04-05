@@ -11,8 +11,8 @@ import {
 } from "@fedify/botkit";
 
 const SERVER_NAME = Deno.env.get("SERVER_NAME");
-if (SERVER_NAME == null) {
-  console.error("SERVER_NAME environment variable required.");
+if (!SERVER_NAME) {
+  console.error("SERVER_NAME env var required.");
   Deno.exit(1);
 }
 
@@ -22,8 +22,8 @@ const KV_PATH = "./data/kv";
 interface Feed {
   url: string;
   title: string;
-  lastEntryId: string | null;
-  language: string;
+  lastId: string | null;
+  lang: string;
 }
 
 interface Post {
@@ -31,18 +31,18 @@ interface Post {
   link: string;
   feedUrl: string;
   entryId: string;
-  language: string;
+  lang: string;
 }
 
-const queue: Post[] = [];
+const postQ: Post[] = [];
 
-function ensureDataDir() {
+function prepareData() {
   try {
     Deno.mkdirSync("./data", { recursive: true });
   } catch { /* ignore */ }
 }
 
-function initDB(): DB {
+function openDb(): DB {
   const db = new DB(SQLITE_PATH);
   db.execute(`
     CREATE TABLE IF NOT EXISTS feeds (
@@ -56,109 +56,103 @@ function initDB(): DB {
   return db;
 }
 
-function readAllFeeds(db: DB): Feed[] {
+function getFeeds(db: DB): Feed[] {
   return db.query<[string, string, string | null, string]>(
     "SELECT url, title, last_entry_id, language FROM feeds",
-  ).map(([url, title, lastEntryId, language]) => ({
+  ).map(([url, title, lastId, lang]) => ({
     url,
     title,
-    lastEntryId,
-    language,
+    lastId,
+    lang,
   }));
 }
 
-function updateLastEntryId(db: DB, url: string, id: string) {
+function getFeed(db: DB, url: string): Feed {
+  const row = db.query<[string, string, string | null, string]>(
+    "SELECT title, url, last_entry_id, language FROM feeds WHERE url = ?",
+    [url],
+  )[0];
+  if (!row) throw new Error(`No such feed: ${url}`);
+  const [title, _, lastId, lang] = row;
+  return { url, title, lastId, lang };
+}
+
+function setLastId(db: DB, url: string, id: string) {
   db.query("UPDATE feeds SET last_entry_id = ? WHERE url = ?", [id, url]);
 }
 
-function isDuplicateLastEntryId(db: DB, url: string, id: string): boolean {
-  const result = db.query<[string | null]>(
+function isDupId(db: DB, url: string, id: string): boolean {
+  const row = db.query<[string | null]>(
     "SELECT last_entry_id FROM feeds WHERE url = ?",
     [url],
-  );
-
-  if (result.length === 0) return true;
-
-  const [lastEntryId] = result[0];
-  return lastEntryId === id;
+  )[0];
+  if (!row) return true;
+  return row[0] === id;
 }
 
-function readFeed(db: DB, url: string): Feed {
-  const result = db.query<[string, string, string | null, string]>(
-    "SELECT title, url, last_entry_id, language FROM feeds WHERE url = ?",
-    [url],
-  );
+async function fetchNew(db: DB) {
+  const seen = new Set(postQ.map((p) => p.entryId));
 
-  if (result.length === 0) {
-    throw new Error(`Feed not found: ${url}`);
-  }
-
-  const [title, _, lastEntryId, language] = result[0];
-  return { url, title, lastEntryId, language };
-}
-
-async function enqueue(db: DB) {
-  for (const { url, lastEntryId, language } of readAllFeeds(db)) {
+  for (const { url, lastId, lang } of getFeeds(db)) {
     try {
       const res = await fetch(url);
       const xml = await res.text();
       const feed = await parseFeed(xml);
-      const entries: Post[] = [];
 
-      for (const entry of feed.entries) {
-        const entryId = entry.id ?? entry.links[0]?.href;
-        if (!entryId || entryId === lastEntryId) break;
+      const items: Post[] = [];
+      for (const e of feed.entries) {
+        if (!e.links?.length || !e.links[0].href) continue;
 
-        entries.push({
-          title: entry.title.value ?? "Untitled",
-          link: entry.links[0]?.href ?? "",
+        const id = e.id ?? e.links[0].href;
+        if (!id || id === lastId) break;
+
+        items.push({
+          title: e.title.value ?? "Untitled",
+          link: e.links[0].href,
           feedUrl: url,
-          entryId,
-          language,
+          entryId: id,
+          lang,
         });
       }
 
-      entries.reverse().forEach((entry) => {
-        if (!queue.some((q) => q.entryId === entry.entryId)) {
-          queue.push(entry);
-          console.log(`Enqueued: ${entry.title} (${entry.feedUrl})`);
+      items.reverse().forEach((item) => {
+        if (!seen.has(item.entryId)) {
+          postQ.push(item);
+          seen.add(item.entryId);
+          console.log(`Enqueued: ${item.title} (${item.feedUrl})`);
         }
       });
     } catch (err) {
-      console.error(`Failed to process feed (${url}):`, err);
+      console.error(`Failed feed (${url}):`, err);
     }
   }
 }
 
-async function dequeue(db: DB, session: Session<any>) {
-  if (queue.length === 0) return;
+async function publishNext(db: DB, s: Session<any>) {
+  if (postQ.length === 0) return;
 
-  const post = queue.shift();
-  if (!post) return;
+  const p = postQ.shift();
+  if (!p) return;
 
   try {
-    if (isDuplicateLastEntryId(db, post.feedUrl, post.entryId)) return;
+    if (isDupId(db, p.feedUrl, p.entryId)) return;
 
-    const feed = readFeed(db, post.feedUrl);
-    await session.publish(
-      text`${link(post.title, post.link)} (${feed.title})`,
-      {
-        language: post.language,
-      },
-    );
+    const f = getFeed(db, p.feedUrl);
+    await s.publish(text`${link(p.title, p.link)} (${f.title})`, {
+      language: p.lang,
+    });
 
-    updateLastEntryId(db, post.feedUrl, post.entryId);
-
-    console.log(`Published: ${post.title} (${post.feedUrl})`);
+    setLastId(db, p.feedUrl, p.entryId);
+    console.log(`Posted: ${p.title} (${p.feedUrl})`);
   } catch (err) {
-    console.error(`Failed to publish (${post.title}):`, err);
+    console.error(`Failed post (${p.title}):`, err);
   }
 }
 
-ensureDataDir();
-const db = initDB();
-
+prepareData();
+const db = openDb();
 const kv = await Deno.openKv(KV_PATH);
+
 const bot = createBot<void>({
   username: "techblogbot",
   name: "Tech Blog Bot",
@@ -168,17 +162,19 @@ const bot = createBot<void>({
   behindProxy: true,
 });
 
-await enqueue(db);
-const session = bot.getSession(`https://${SERVER_NAME}`);
-await dequeue(db, session);
+await fetchNew(db);
+await publishNext(db, bot.getSession(`https://${SERVER_NAME}`));
 
-Deno.cron("scheduled enqueue", "0 * * * *", async () => {
-  await enqueue(db);
-});
+Deno.cron(
+  "load feeds",
+  "0 * * * *",
+  () => fetchNew(db),
+);
 
-Deno.cron("scheduled dequeue", "*/1 * * * *", async () => {
-  const session = bot.getSession(`https://${SERVER_NAME}`);
-  await dequeue(db, session);
-});
+Deno.cron(
+  "publish article",
+  "*/1 * * * *",
+  () => publishNext(db, bot.getSession(`https://${SERVER_NAME}`)),
+);
 
 export default bot;
