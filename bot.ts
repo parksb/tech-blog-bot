@@ -160,7 +160,7 @@ const db = openDb();
 const kv = await Deno.openKv(KV_PATH);
 
 const bot = createBot<void>({
-  username: "techblogbot",
+  username: "bot",
   name: "Tech Blog Bot",
   summary: text`Fediverse bot for delivering tech blog articles`,
   icon: new URL(
