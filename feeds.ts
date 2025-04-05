@@ -1,4 +1,4 @@
-export const FEEDS = [
+export default [
   {
     title: "11번가",
     url: "https://11st-tech.github.io/rss",

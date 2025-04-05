@@ -3,7 +3,7 @@ import { DB } from "https://deno.land/x/sqlite/mod.ts";
 import { parseFeed } from "https://deno.land/x/rss/mod.ts";
 import { DenoKvMessageQueue, DenoKvStore } from "@fedify/fedify/x/denokv";
 import { createBot, link, mention, Session, text } from "@fedify/botkit";
-import { FEEDS } from "./feeds.ts";
+import FEEDS from "./feeds.ts";
 
 const SERVER_NAME = Deno.env.get("SERVER_NAME");
 if (!SERVER_NAME) {
@@ -126,9 +126,7 @@ async function fetchNew(db: DB) {
           entryId: id,
           date: e.published
             ? Temporal.Instant.from(e.published.toISOString())
-              .toZonedDateTimeISO(
-                "Asia/Seoul",
-              )
+              .toZonedDateTimeISO("Asia/Seoul")
             : null,
           lang,
         });
