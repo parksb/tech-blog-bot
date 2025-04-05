@@ -120,14 +120,17 @@ async function fetchNew(db: DB) {
         });
       }
 
-      const newItems = lastId == null ? [items[0]] : items.reverse();
-      newItems.forEach((item) => {
-        if (!seen.has(item.entryId)) {
-          postQ.push(item);
-          seen.add(item.entryId);
-          console.log(`Enqueued: ${item.title} (${item.feedUrl})`);
-        }
-      });
+      if (lastId == null) {
+        setLastId(db, url, items[0].entryId);
+      } else {
+        items.reverse().forEach((item) => {
+          if (!seen.has(item.entryId)) {
+            postQ.push(item);
+            seen.add(item.entryId);
+            console.log(`Enqueued: ${item.title} (${item.feedUrl})`);
+          }
+        });
+      }
     } catch (err) {
       console.error(`Failed feed (${url}):`, err);
     }
