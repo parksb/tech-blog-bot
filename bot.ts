@@ -9,6 +9,7 @@ import {
   Session,
   text,
 } from "@fedify/botkit";
+import { FEEDS } from "./feeds.ts";
 
 const SERVER_NAME = Deno.env.get("SERVER_NAME");
 if (!SERVER_NAME) {
@@ -56,10 +57,20 @@ function openDb(): DB {
   return db;
 }
 
+function seedFeeds(db: DB) {
+  const feeds = FEEDS.map((f) => [f.title, f.url, f.language]);
+  for (const feed of feeds) {
+    db.query(
+      "INSERT OR IGNORE INTO feeds (title, url, language) VALUES (?, ?, ?)",
+      feed,
+    );
+  }
+}
+
 function getFeeds(db: DB): Feed[] {
   return db.query<[string, string, string | null, string]>(
-    "SELECT url, title, last_entry_id, language FROM feeds",
-  ).map(([url, title, lastId, lang]) => ({
+    "SELECT title, url, last_entry_id, language FROM feeds",
+  ).map(([title, url, lastId, lang]) => ({
     url,
     title,
     lastId,
@@ -162,6 +173,7 @@ const bot = createBot<void>({
   behindProxy: true,
 });
 
+seedFeeds(db);
 await fetchNew(db);
 await publishNext(db, bot.getSession(`https://${SERVER_NAME}`));
 
