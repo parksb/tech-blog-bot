@@ -135,8 +135,23 @@ export default [
     language: "ko",
   },
   {
+    title: "여기어때",
+    url: "https://techblog.gccompany.co.kr/feed",
+    language: "ko",
+  },
+  {
     title: "인프랩",
     url: "https://tech.inflab.com/rss.xml",
+    language: "ko",
+  },
+  {
+    title: "카카오",
+    url: "https://tech.kakao.com/feed",
+    language: "ko",
+  },
+  {
+    title: "카카오뱅크",
+    url: "https://tech.kakaobank.com/index.xml",
     language: "ko",
   },
   {
@@ -170,11 +185,6 @@ export default [
     language: "ko",
   },
   {
-    title: "카카오",
-    url: "https://tech.kakao.com/feed",
-    language: "ko",
-  },
-  {
     title: "하이퍼커넥트",
     url: "https://hyperconnect.github.io/feed.xml",
     language: "ko",
@@ -190,6 +200,16 @@ export default [
     language: "ko",
   },
   {
+    title: "Cloudflare",
+    url: "https://blog.cloudflare.com/rss",
+    language: "en",
+  },
+  {
+    title: "Airbnb",
+    url: "https://medium.com/feed/airbnb-engineering",
+    language: "en",
+  },
+  {
     title: "Spotify",
     url: "https://engineering.atspotify.com/feed",
     language: "en",
@@ -200,13 +220,33 @@ export default [
     language: "en",
   },
   {
+    title: "React",
+    url: "https://react.dev/rss.xml",
+    language: "en",
+  },
+  {
     title: "GitHub",
     url: "https://github.blog/feed",
     language: "en",
   },
   {
+    title: "Google Research",
+    url: "https://research.google/blog/rss",
+    language: "en",
+  },
+  {
+    title: "MDN",
+    url: "https://developer.mozilla.org/en-US/blog/rss.xml",
+    language: "en",
+  },
+  {
     title: "Netflix",
     url: "https://netflixtechblog.com/feed",
+    language: "en",
+  },
+  {
+    title: "Vercel",
+    url: "https://vercel.com/atom",
     language: "en",
   },
 ];
