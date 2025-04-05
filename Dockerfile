@@ -8,4 +8,4 @@ RUN deno install
 
 COPY . .
 
-CMD ["deno", "serve", "-A", "--unstable-kv", "--unstable-cron" "bot.ts"]
+CMD ["deno", "serve", "-A", "--unstable-kv", "--unstable-cron", "bot.ts"]
