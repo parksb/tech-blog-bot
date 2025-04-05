@@ -156,7 +156,7 @@ const kv = await Deno.openKv(KV_PATH);
 const bot = createBot<void>({
   username: "techblogbot",
   name: "Tech Blog Bot",
-  summary: text`A bot that posts tech blogs`,
+  summary: text`Fediverse bot for delivering tech blog articles`,
   kv: new DenoKvStore(kv),
   queue: new InProcessMessageQueue(),
   behindProxy: true,
