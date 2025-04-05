@@ -17,7 +17,7 @@ if (!SERVER_NAME) {
   Deno.exit(1);
 }
 
-const SQLITE_PATH = "./data/rss.db";
+const SQLITE_PATH = "./data/data.db";
 const KV_PATH = "./data/kv";
 
 interface Feed {
@@ -126,7 +126,8 @@ async function fetchNew(db: DB) {
         });
       }
 
-      items.reverse().forEach((item) => {
+      const newItems = lastId == null ? [items[0]] : items.reverse();
+      newItems.forEach((item) => {
         if (!seen.has(item.entryId)) {
           postQ.push(item);
           seen.add(item.entryId);
