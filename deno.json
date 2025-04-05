@@ -3,5 +3,5 @@
     "@fedify/botkit": "jsr:@fedify/botkit@^0.1.1",
     "@fedify/fedify": "jsr:@fedify/fedify@^1.5.0"
   },
-  "unstable": ["temporal"]
+  "unstable": ["temporal", "kv", "cron"]
 }

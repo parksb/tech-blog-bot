@@ -24,6 +24,7 @@ interface Feed {
 interface Post {
   title: string;
   link: string;
+  date: ZonedDateTime | null;
   feedUrl: string;
   entryId: string;
   lang: string;
@@ -95,6 +96,13 @@ function isDupId(db: DB, url: string, id: string): boolean {
   return row[0] === id;
 }
 
+function format(datetime: ZonedDateTime): string {
+  const year = datetime.year;
+  const month = String(datetime.month).padStart(2, "0");
+  const day = String(datetime.day).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 async function fetchNew(db: DB) {
   const seen = new Set(postQ.map((p) => p.entryId));
 
@@ -116,6 +124,12 @@ async function fetchNew(db: DB) {
           link: e.links[0].href,
           feedUrl: url,
           entryId: id,
+          date: e.published
+            ? Temporal.Instant.from(e.published.toISOString())
+              .toZonedDateTimeISO(
+                "Asia/Seoul",
+              )
+            : null,
           lang,
         });
       }
@@ -127,7 +141,7 @@ async function fetchNew(db: DB) {
           if (!seen.has(item.entryId)) {
             postQ.push(item);
             seen.add(item.entryId);
-            console.log(`Enqueued: ${item.title} (${item.feedUrl})`);
+            console.log(`Enqueued: [${item.feedUrl}] ${item.title}`);
           }
         });
       }
@@ -147,9 +161,14 @@ async function publishNext(db: DB, s: Session<any>) {
     if (isDupId(db, p.feedUrl, p.entryId)) return;
 
     const f = getFeed(db, p.feedUrl);
-    await s.publish(text`${link(p.title, p.link)} (${f.title})`, {
-      language: p.lang,
-    });
+    await s.publish(
+      text`[${f.title}] ${link(p.title, p.link)}${
+        p.date !== null ? ` (${format(p.date)})` : ""
+      }`,
+      {
+        language: p.lang,
+      },
+    );
 
     setLastId(db, p.feedUrl, p.entryId);
     console.log(`Published: ${p.title} (${p.feedUrl})`);
