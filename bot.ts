@@ -1,14 +1,8 @@
 import "jsr:@std/dotenv/load";
 import { DB } from "https://deno.land/x/sqlite/mod.ts";
 import { parseFeed } from "https://deno.land/x/rss/mod.ts";
-import { DenoKvStore } from "@fedify/fedify/x/denokv";
-import {
-  createBot,
-  InProcessMessageQueue,
-  link,
-  Session,
-  text,
-} from "@fedify/botkit";
+import { DenoKvMessageQueue, DenoKvStore } from "@fedify/fedify/x/denokv";
+import { createBot, link, mention, Session, text } from "@fedify/botkit";
 import { FEEDS } from "./feeds.ts";
 
 const SERVER_NAME = Deno.env.get("SERVER_NAME");
@@ -155,7 +149,7 @@ async function publishNext(db: DB, s: Session<any>) {
     });
 
     setLastId(db, p.feedUrl, p.entryId);
-    console.log(`Posted: ${p.title} (${p.feedUrl})`);
+    console.log(`Published: ${p.title} (${p.feedUrl})`);
   } catch (err) {
     console.error(`Failed post (${p.title}):`, err);
   }
@@ -169,8 +163,15 @@ const bot = createBot<void>({
   username: "techblogbot",
   name: "Tech Blog Bot",
   summary: text`Fediverse bot for delivering tech blog articles`,
+  icon: new URL(
+    "https://raw.githubusercontent.com/parksb/tech-blog-bot/refs/heads/main/icon.png",
+  ),
+  properties: {
+    "Source code": link("GitHub", "https://github.com/parksb/tech-blog-bot"),
+    "Created by": mention("@parksb@social.silicon.moe"),
+  },
   kv: new DenoKvStore(kv),
-  queue: new InProcessMessageQueue(),
+  queue: new DenoKvMessageQueue(kv),
   behindProxy: true,
 });
 
