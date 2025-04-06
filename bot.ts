@@ -18,7 +18,7 @@ interface Feed {
   url: string;
   title: string;
   lastId: string | null;
-  lang: string;
+  language: string;
 }
 
 interface Post {
@@ -27,7 +27,7 @@ interface Post {
   date: ZonedDateTime | null;
   feedUrl: string;
   entryId: string;
-  lang: string;
+  language: string;
 }
 
 const postQ: Post[] = [];
@@ -65,11 +65,11 @@ function seedFeeds(db: DB) {
 function getFeeds(db: DB): Feed[] {
   return db.query<[string, string, string | null, string]>(
     "SELECT title, url, last_entry_id, language FROM feeds",
-  ).map(([title, url, lastId, lang]) => ({
+  ).map(([title, url, lastId, language]) => ({
     url,
     title,
     lastId,
-    lang,
+    language,
   }));
 }
 
@@ -79,8 +79,8 @@ function getFeed(db: DB, url: string): Feed {
     [url],
   )[0];
   if (!row) throw new Error(`No such feed: ${url}`);
-  const [title, _, lastId, lang] = row;
-  return { url, title, lastId, lang };
+  const [title, _, lastId, language] = row;
+  return { url, title, lastId, language };
 }
 
 function setLastId(db: DB, url: string, id: string) {
@@ -106,46 +106,58 @@ function format(datetime: ZonedDateTime): string {
 async function fetchNew(db: DB) {
   const seen = new Set(postQ.map((p) => p.entryId));
 
-  for (const { url, lastId, lang } of getFeeds(db)) {
-    try {
-      const res = await fetch(url);
-      const xml = await res.text();
-      const feed = await parseFeed(xml);
-
-      const items: Post[] = [];
-      for (const e of feed.entries) {
-        if (!e.links?.length || !e.links[0].href) continue;
-
-        const id = e.id ?? e.links[0].href;
-        if (!id || id === lastId) break;
-
-        items.push({
-          title: e.title.value ?? "Untitled",
-          link: e.links[0].href,
-          feedUrl: url,
-          entryId: id,
-          date: e.published
-            ? Temporal.Instant.from(e.published.toISOString())
-              .toZonedDateTimeISO("Asia/Seoul")
-            : null,
-          lang,
-        });
-      }
-
-      if (lastId == null) {
-        setLastId(db, url, items[0].entryId);
-      } else {
-        items.reverse().forEach((item) => {
-          if (!seen.has(item.entryId)) {
-            postQ.push(item);
-            seen.add(item.entryId);
-            console.log(`Enqueued: [${item.feedUrl}] ${item.title}`);
-          }
-        });
-      }
-    } catch (err) {
-      console.error(`Failed feed (${url}):`, err);
+  const feeds = getFeeds(db);
+  const cunks = (() => {
+    const size = 10;
+    const chunks: Feed[][] = [];
+    for (let i = 0; i < feeds.length; i += size) {
+      chunks.push(feeds.slice(i, i + size));
     }
+    return chunks;
+  })();
+
+  for (const chunk of cunks) {
+    await Promise.all(chunk.map(async ({ url, lastId, language }) => {
+      try {
+        const res = await fetch(url);
+        const xml = await res.text();
+        const feed = await parseFeed(xml);
+
+        const items: Post[] = [];
+        for (const e of feed.entries) {
+          if (!e.links?.length || !e.links[0].href) continue;
+
+          const id = e.id ?? e.links[0].href;
+          if (!id || id === lastId) break;
+
+          items.push({
+            title: e.title.value ?? "Untitled",
+            link: e.links[0].href,
+            feedUrl: url,
+            entryId: id,
+            date: e.published
+              ? Temporal.Instant.from(e.published.toISOString())
+                .toZonedDateTimeISO("Asia/Seoul")
+              : null,
+            language,
+          });
+        }
+
+        if (lastId == null) {
+          setLastId(db, url, items[0].entryId);
+        } else {
+          items.reverse().forEach((item) => {
+            if (!seen.has(item.entryId)) {
+              postQ.push(item);
+              seen.add(item.entryId);
+              console.log(`Enqueued: [${item.feedUrl}] ${item.title}`);
+            }
+          });
+        }
+      } catch (err) {
+        console.error(`Failed feed (${url}):`, err);
+      }
+    }));
   }
 }
 
@@ -164,7 +176,7 @@ async function publishNext(db: DB, s: Session<any>) {
         p.date !== null ? ` (${format(p.date)})` : ""
       }`,
       {
-        language: p.lang,
+        language: p.language,
       },
     );
 
