@@ -24,13 +24,13 @@ interface Feed {
 interface Post {
   title: string;
   link: string;
-  date: ZonedDateTime | null;
+  date: Temporal.Instant | null;
   feedUrl: string;
   entryId: string;
   language: string;
 }
 
-const postQ: Post[] = [];
+const queue: Post[] = [];
 
 function prepareData() {
   try {
@@ -96,7 +96,7 @@ function isDupId(db: DB, url: string, id: string): boolean {
   return row[0] === id;
 }
 
-function format(datetime: ZonedDateTime): string {
+function format(datetime: Temporal.ZonedDateTime): string {
   const year = datetime.year;
   const month = String(datetime.month).padStart(2, "0");
   const day = String(datetime.day).padStart(2, "0");
@@ -104,7 +104,8 @@ function format(datetime: ZonedDateTime): string {
 }
 
 async function fetchNew(db: DB) {
-  const seen = new Set(postQ.map((p) => p.entryId));
+  const seen = new Set(queue.map((p) => p.entryId));
+  const threeDaysAgo = Temporal.Now.instant().subtract({ hours: 72 });
 
   const feeds = getFeeds(db);
   const cunks = (() => {
@@ -124,20 +125,19 @@ async function fetchNew(db: DB) {
         const feed = await parseFeed(xml);
 
         const items: Post[] = [];
-        for (const e of feed.entries) {
-          if (!e.links?.length || !e.links[0].href) continue;
+        for (const entry of feed.entries) {
+          if (!entry.links?.length || !entry.links[0].href) continue;
 
-          const id = e.id ?? e.links[0].href;
+          const id = entry.id ?? entry.links[0].href;
           if (!id || id === lastId) break;
 
           items.push({
-            title: e.title.value ?? "Untitled",
-            link: e.links[0].href,
+            title: entry.title?.value ?? "Untitled",
+            link: entry.links[0].href,
             feedUrl: url,
             entryId: id,
-            date: e.published
-              ? Temporal.Instant.from(e.published.toISOString())
-                .toZonedDateTimeISO("Asia/Seoul")
+            date: entry.published
+              ? Temporal.Instant.from(entry.published.toISOString())
               : null,
             language,
           });
@@ -146,13 +146,16 @@ async function fetchNew(db: DB) {
         if (lastId == null) {
           setLastId(db, url, items[0].entryId);
         } else {
-          items.reverse().forEach((item) => {
-            if (!seen.has(item.entryId)) {
-              postQ.push(item);
-              seen.add(item.entryId);
-              console.log(`Enqueued: [${item.feedUrl}] ${item.title}`);
-            }
-          });
+          items.reverse()
+            .filter((x) => !seen.has(x.entryId))
+            .filter((x) =>
+              x.date ? Temporal.Instant.compare(x.date, threeDaysAgo) > 0 : true
+            )
+            .forEach((x) => {
+              queue.push(x);
+              seen.add(x.entryId);
+              console.log(`Enqueued: [${x.feedUrl}] ${x.title}`);
+            });
         }
       } catch (err) {
         console.error(`Failed feed (${url}):`, err);
@@ -161,29 +164,31 @@ async function fetchNew(db: DB) {
   }
 }
 
-async function publishNext(db: DB, s: Session<any>) {
-  if (postQ.length === 0) return;
+async function publishNext(db: DB, session: Session<any>) {
+  if (queue.length === 0) return;
 
-  const p = postQ.shift();
-  if (!p) return;
+  const x = queue.shift();
+  if (!x) return;
 
   try {
-    if (isDupId(db, p.feedUrl, p.entryId)) return;
+    if (isDupId(db, x.feedUrl, x.entryId)) return;
 
-    const f = getFeed(db, p.feedUrl);
-    await s.publish(
-      text`[${f.title}] ${link(p.title, p.link)}${
-        p.date !== null ? ` (${format(p.date)})` : ""
+    const f = getFeed(db, x.feedUrl);
+    await session.publish(
+      text`[${f.title}] ${link(x.title, x.link)}${
+        x.date !== null
+          ? ` (${format(x.date.toZonedDateTimeISO("Asia/Seoul"))})`
+          : ""
       }`,
       {
-        language: p.language,
+        language: x.language,
       },
     );
 
-    setLastId(db, p.feedUrl, p.entryId);
-    console.log(`Published: ${p.title} (${p.feedUrl})`);
+    setLastId(db, x.feedUrl, x.entryId);
+    console.log(`Published: ${x.title} (${x.feedUrl})`);
   } catch (err) {
-    console.error(`Failed post (${p.title}):`, err);
+    console.error(`Failed post (${x.title}):`, err);
   }
 }
 
