@@ -4,6 +4,7 @@
 ### Deno ###
 /.idea/
 /.vscode/
+/.vim/
 
 /node_modules
 

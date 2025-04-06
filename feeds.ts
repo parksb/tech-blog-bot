@@ -20,6 +20,11 @@ export default [
     language: "ko",
   },
   {
+    title: "도서출판 인사이트",
+    url: "https://blog.insightbook.co.kr/feed",
+    language: "ko",
+  },
+  {
     title: "에잇퍼센트",
     url: "https://8percent.github.io/feed.xml",
     language: "ko",
@@ -75,6 +80,11 @@ export default [
     language: "ko",
   },
   {
+    title: "원티드랩",
+    url: "https://medium.com/feed/wantedjobs",
+    language: "ko",
+  },
+  {
     title: "개발자스럽다",
     url: "https://blog.gaerae.com/feeds/posts/default",
     language: "ko",
@@ -125,6 +135,11 @@ export default [
     language: "ko",
   },
   {
+    title: "스포카",
+    url: "https://spoqa.github.io/atom.xml",
+    language: "ko",
+  },
+  {
     title: "올리브영",
     url: "https://oliveyoung.tech/rss.xml",
     language: "ko",
@@ -145,6 +160,11 @@ export default [
     language: "ko",
   },
   {
+    title: "티맵모빌리티",
+    url: "https://brunch.co.kr/rss/@@dsaj",
+    language: "ko",
+  },
+  {
     title: "카카오",
     url: "https://tech.kakao.com/feed",
     language: "ko",
@@ -152,6 +172,16 @@ export default [
   {
     title: "카카오뱅크",
     url: "https://tech.kakaobank.com/index.xml",
+    language: "ko",
+  },
+  {
+    title: "카카오스타일",
+    url: "https://devblog.kakaostyle.com/ko/index.xml",
+    language: "ko",
+  },
+  {
+    title: "카카오엔터프라이즈",
+    url: "https://tech.kakaoenterprise.com/rss",
     language: "ko",
   },
   {
@@ -182,6 +212,11 @@ export default [
   {
     title: "토스",
     url: "https://toss.tech/rss.xml",
+    language: "ko",
+  },
+  {
+    title: "플라네타리움",
+    url: "https://snack.planetarium.dev/kor/index.xml",
     language: "ko",
   },
   {
