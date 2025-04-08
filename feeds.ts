@@ -230,6 +230,11 @@ export default [
     language: "ko",
   },
   {
+    title: "AWS Architecture",
+    url: "https://aws.amazon.com/blogs/architecture/feed",
+    language: "en",
+  },
+  {
     title: "PRND",
     url: "https://medium.com/feed/prnd",
     language: "ko",
