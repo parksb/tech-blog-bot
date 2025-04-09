@@ -22,11 +22,11 @@ interface Feed {
 }
 
 interface Post {
+  id: string;
   title: string;
   link: string;
   date: Temporal.Instant | null;
   feedUrl: string;
-  entryId: string;
   language: string;
 }
 
@@ -104,7 +104,7 @@ function format(datetime: Temporal.ZonedDateTime): string {
 }
 
 async function fetchNew(db: DB) {
-  const seen = new Set(queue.map((p) => p.entryId));
+  const seen = new Set(queue.map((p) => p.id));
   const threeDaysAgo = Temporal.Now.instant().subtract({ hours: 72 });
 
   const feeds = getFeeds(db);
@@ -116,6 +116,8 @@ async function fetchNew(db: DB) {
     }
     return chunks;
   })();
+
+  const removeHttp = (url: string | null) => url?.replace(/^https?:\/\//, "");
 
   for (const chunk of cunks) {
     await Promise.all(chunk.map(async ({ url, lastId, language }) => {
@@ -129,36 +131,38 @@ async function fetchNew(db: DB) {
           if (!entry.links?.length || !entry.links[0].href) continue;
 
           const id = entry.id ?? entry.links[0].href;
-          if (!id || id === lastId) break;
+          if (!id || removeHttp(id) === removeHttp(lastId)) break;
 
           items.push({
+            id,
             title: entry.title?.value ?? "Untitled",
             link: entry.links[0].href,
             feedUrl: url,
-            entryId: id,
             date: entry.published
               ? Temporal.Instant.from(entry.published.toISOString())
               : null,
             language,
           });
+
+          if (lastId === null) break;
         }
 
-        if (lastId == null) {
-          setLastId(db, url, items[0].entryId);
+        if (lastId === null) {
+          setLastId(db, url, items[0].id);
         } else {
           items.reverse()
-            .filter((x) => !seen.has(x.entryId))
+            .filter((x) => !seen.has(x.id))
             .filter((x) =>
               x.date ? Temporal.Instant.compare(x.date, threeDaysAgo) > 0 : true
             )
             .forEach((x) => {
               queue.push(x);
-              seen.add(x.entryId);
-              console.log(`Enqueued: [${x.feedUrl}] ${x.title}`);
+              seen.add(x.id);
+              console.log(`Enqueued: [${x.feedUrl}] ${x.title} (${x.id})`);
             });
         }
       } catch (err) {
-        console.error(`Failed feed (${url}):`, err);
+        console.error(`Failed to fetch: [${url}] `, err);
       }
     }));
   }
@@ -171,7 +175,7 @@ async function publishNext(db: DB, session: Session<any>) {
   if (!x) return;
 
   try {
-    if (isDupId(db, x.feedUrl, x.entryId)) return;
+    if (isDupId(db, x.feedUrl, x.id)) return;
 
     const f = getFeed(db, x.feedUrl);
     await session.publish(
@@ -185,10 +189,13 @@ async function publishNext(db: DB, session: Session<any>) {
       },
     );
 
-    setLastId(db, x.feedUrl, x.entryId);
-    console.log(`Published: ${x.title} (${x.feedUrl})`);
+    setLastId(db, x.feedUrl, x.id);
+    console.log(`Published: [${f.title}] ${x.title} (${x.id})`);
   } catch (err) {
-    console.error(`Failed post (${x.title}):`, err);
+    console.error(
+      `Failed to publish: [${x.feedUrl}] ${x.title} (${x.id}) `,
+      err,
+    );
   }
 }
 
