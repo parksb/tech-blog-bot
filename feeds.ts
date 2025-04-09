@@ -31,7 +31,7 @@ export default [
   },
   {
     title: "AWS",
-    url: "https://aws.amazon.com/ko/blogs/korea/feed",
+    url: "https://aws.amazon.com/ko/blogs/tech/feed",
     language: "ko",
   },
   {
@@ -241,7 +241,7 @@ export default [
   },
   {
     title: "Cloudflare",
-    url: "https://blog.cloudflare.com/rss",
+    url: "https://blog.cloudflare.com/tag/developers/rss",
     language: "en",
   },
   {
