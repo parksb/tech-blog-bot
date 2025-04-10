@@ -284,9 +284,4 @@ export default [
     url: "https://netflixtechblog.com/feed",
     language: "en",
   },
-  {
-    title: "Vercel",
-    url: "https://vercel.com/atom",
-    language: "en",
-  },
 ];
