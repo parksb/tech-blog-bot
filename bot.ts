@@ -60,6 +60,15 @@ function seedFeeds(db: DB) {
       feed,
     );
   }
+
+  const urls = feeds.map((f) => f[1]);
+  if (urls.length > 0) {
+    const placeholders = urls.map(() => "?").join(", ");
+    db.query(
+      `DELETE FROM feeds WHERE url NOT IN (${placeholders})`,
+      urls,
+    );
+  }
 }
 
 function getFeeds(db: DB): Feed[] {
@@ -133,13 +142,15 @@ async function fetchNew(db: DB) {
           const id = entry.id ?? entry.links[0].href;
           if (!id || removeHttp(id) === removeHttp(lastId)) break;
 
+          const date = entry.published ?? entry.updated;
+
           items.push({
             id,
             title: entry.title?.value ?? "Untitled",
             link: entry.links[0].href,
             feedUrl: url,
-            date: entry.published
-              ? Temporal.Instant.from(entry.published.toISOString())
+            date: date
+              ? Temporal.Instant.from(date.toISOString())
               : null,
             language,
           });
@@ -231,7 +242,7 @@ Deno.cron(
 
 Deno.cron(
   "publish article",
-  "*/1 * * * *",
+  "*/3 * * * *",
   () => publishNext(db, bot.getSession(`https://${SERVER_NAME}`)),
 );
 
