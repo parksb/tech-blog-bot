@@ -1,4 +1,11 @@
-export default [
+type Feed = {
+  title: string;
+  url: string;
+  showDescription?: boolean;
+  language: string;
+};
+
+const FEEDS: readonly Feed[] = [
   {
     title: "11번가",
     url: "https://11st-tech.github.io/rss",
@@ -200,9 +207,9 @@ export default [
     language: "ko",
   },
   {
-    title:"카카오페이",
-    url:"https://tech.kakaopay.com/rss",
-    language:"ko",
+    title: "카카오페이",
+    url: "https://tech.kakaopay.com/rss",
+    language: "ko",
   },
   {
     title: "컬리",
@@ -227,6 +234,7 @@ export default [
   {
     title: "토스",
     url: "https://toss.tech/rss.xml",
+    showDescription: true,
     language: "ko",
   },
   {
@@ -247,6 +255,7 @@ export default [
   {
     title: "AWS Architecture",
     url: "https://aws.amazon.com/blogs/architecture/feed",
+    showDescription: true,
     language: "en",
   },
   {
@@ -257,6 +266,7 @@ export default [
   {
     title: "Cloudflare",
     url: "https://blog.cloudflare.com/tag/developers/rss",
+    showDescription: true,
     language: "en",
   },
   {
@@ -292,6 +302,7 @@ export default [
   {
     title: "MDN",
     url: "https://developer.mozilla.org/en-US/blog/rss.xml",
+    showDescription: true,
     language: "en",
   },
   {
@@ -299,4 +310,6 @@ export default [
     url: "https://netflixtechblog.com/feed",
     language: "en",
   },
-];
+] as const;
+
+export default FEEDS;
