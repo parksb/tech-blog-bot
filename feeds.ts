@@ -40,6 +40,11 @@ export default [
     language: "ko",
   },
   {
+    title: "GS리테일",
+    url: "https://gsretail.tistory.com/rss",
+    language: "ko",
+  },
+  {
     title: "LY Corporation",
     url: "https://techblog.lycorp.co.jp/ko/feed/index.xml",
     language: "ko",
@@ -135,6 +140,11 @@ export default [
     language: "ko",
   },
   {
+    title: "스푼랩스",
+    url: "https://medium.com/feed/spoontech",
+    language: "ko",
+  },
+  {
     title: "스포카",
     url: "https://spoqa.github.io/atom.xml",
     language: "ko",
@@ -188,6 +198,11 @@ export default [
     title: "카카오엔터테인먼트 FE",
     url: "https://fe-developers.kakaoent.com/rss.xml",
     language: "ko",
+  },
+  {
+    title:"카카오페이",
+    url:"https://tech.kakaopay.com/rss",
+    language:"ko",
   },
   {
     title: "컬리",
