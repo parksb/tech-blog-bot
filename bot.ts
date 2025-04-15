@@ -157,12 +157,18 @@ async function fetchNew(db: DB) {
   const seen = new Set(queue.map((p) => p.id));
   const threeDaysAgo = Temporal.Now.instant().subtract({ hours: 72 });
 
-  const feeds = getFeeds(db);
+  const feeds = new Map(
+    getFeeds(db).map((feed) => [
+      feed.url,
+      feed,
+    ]),
+  );
+
   const cunks = (() => {
     const size = 10;
     const chunks: Feed[][] = [];
-    for (let i = 0; i < feeds.length; i += size) {
-      chunks.push(feeds.slice(i, i + size));
+    for (let i = 0; i < feeds.size; i += size) {
+      chunks.push(Array.from(feeds.values()).slice(i, i + size));
     }
     return chunks;
   })();
@@ -176,6 +182,8 @@ async function fetchNew(db: DB) {
         const xml = await res.text();
         const feed = await parseFeed(xml);
 
+        const { showDescription } = feeds.get(url) ?? {};
+
         const items: Post[] = [];
         for (const entry of feed.entries) {
           if (!entry.links?.length || !entry.links[0].href) continue;
@@ -185,7 +193,10 @@ async function fetchNew(db: DB) {
 
           const date = entry.published ?? entry.updated ?? null;
 
-          let description = entry.description?.value ?? null;
+          let description = showDescription
+            ? entry.content?.value ?? null
+            : null;
+
           if (description && description.length > 250) {
             description = null;
           }
