@@ -22,88 +22,13 @@ const FEEDS: readonly Feed[] = [
     language: "ko",
   },
   {
-    title: "네이버",
-    url: "https://d2.naver.com/d2.atom",
-    language: "ko",
-  },
-  {
-    title: "도서출판 인사이트",
-    url: "https://blog.insightbook.co.kr/feed",
-    language: "ko",
-  },
-  {
-    title: "에잇퍼센트",
-    url: "https://8percent.github.io/feed.xml",
-    language: "ko",
-  },
-  {
-    title: "AWS",
-    url: "https://aws.amazon.com/ko/blogs/tech/feed",
-    language: "ko",
-  },
-  {
-    title: "리멤버",
-    url: "https://tech.remember.co.kr/feed",
-    language: "ko",
-  },
-  {
-    title: "GS리테일",
-    url: "https://gsretail.tistory.com/rss",
-    language: "ko",
-  },
-  {
-    title: "LY Corporation",
-    url: "https://techblog.lycorp.co.jp/ko/feed/index.xml",
-    language: "ko",
-  },
-  {
-    title: "NHN Cloud",
-    url: "https://meetup.nhncloud.com/rss",
-    language: "ko",
-  },
-  {
-    title: "pxd",
-    url: "https://pxdstory.tistory.com/rss",
-    language: "ko",
-  },
-  {
-    title: "SK C&C",
-    url: "https://engineering-skcc.github.io/feed.xml",
-    language: "ko",
-  },
-  {
-    title: "SK플래닛",
-    url: "https://techtopic.skplanet.com/rss.xml",
-    language: "ko",
-  },
-  {
-    title: "쏘카",
-    url: "https://tech.socarcorp.kr/feed.xml",
-    language: "ko",
-  },
-  {
-    title: "SSG",
-    url: "https://medium.com/feed/ssgtech",
-    language: "ko",
-  },
-  {
-    title: "왓챠",
-    url: "https://medium.com/feed/watcha",
-    language: "ko",
-  },
-  {
-    title: "원티드랩",
-    url: "https://medium.com/feed/wantedjobs",
-    language: "ko",
-  },
-  {
     title: "개발자스럽다",
     url: "https://blog.gaerae.com/feeds/posts/default",
     language: "ko",
   },
   {
-    title: "NDS",
-    url: "https://tech.cloud.nongshim.co.kr/feed",
+    title: "네이버",
+    url: "https://d2.naver.com/d2.atom",
     language: "ko",
   },
   {
@@ -114,6 +39,12 @@ const FEEDS: readonly Feed[] = [
   {
     title: "데브시스터즈",
     url: "https://tech.devsisters.com/rss.xml",
+    showDescription: true,
+    language: "ko",
+  },
+  {
+    title: "도서출판 인사이트",
+    url: "https://blog.insightbook.co.kr/feed",
     language: "ko",
   },
   {
@@ -132,6 +63,11 @@ const FEEDS: readonly Feed[] = [
     language: "ko",
   },
   {
+    title: "리멤버",
+    url: "https://tech.remember.co.kr/feed",
+    language: "ko",
+  },
+  {
     title: "모두싸인",
     url: "https://team.modusign.co.kr/feed",
     language: "ko",
@@ -147,23 +83,23 @@ const FEEDS: readonly Feed[] = [
     language: "ko",
   },
   {
-    title: "스푼랩스",
-    url: "https://medium.com/feed/spoontech",
-    language: "ko",
-  },
-  {
     title: "스포카",
     url: "https://spoqa.github.io/atom.xml",
     language: "ko",
   },
   {
-    title: "올리브영",
-    url: "https://oliveyoung.tech/rss.xml",
+    title: "스푼랩스",
+    url: "https://medium.com/feed/spoontech",
     language: "ko",
   },
   {
-    title: "우아한형제들",
-    url: "https://techblog.woowahan.com/feed",
+    title: "쏘카",
+    url: "https://tech.socarcorp.kr/feed.xml",
+    language: "ko",
+  },
+  {
+    title: "에잇퍼센트",
+    url: "https://8percent.github.io/feed.xml",
     language: "ko",
   },
   {
@@ -172,13 +108,28 @@ const FEEDS: readonly Feed[] = [
     language: "ko",
   },
   {
-    title: "인프랩",
-    url: "https://tech.inflab.com/rss.xml",
+    title: "올리브영",
+    url: "https://oliveyoung.tech/rss.xml",
     language: "ko",
   },
   {
-    title: "티맵모빌리티",
-    url: "https://brunch.co.kr/rss/@@dsaj",
+    title: "왓챠",
+    url: "https://medium.com/feed/watcha",
+    language: "ko",
+  },
+  {
+    title: "우아한형제들",
+    url: "https://techblog.woowahan.com/feed",
+    language: "ko",
+  },
+  {
+    title: "원티드랩",
+    url: "https://medium.com/feed/wantedjobs",
+    language: "ko",
+  },
+  {
+    title: "인프랩",
+    url: "https://tech.inflab.com/rss.xml",
     language: "ko",
   },
   {
@@ -189,6 +140,7 @@ const FEEDS: readonly Feed[] = [
   {
     title: "카카오뱅크",
     url: "https://tech.kakaobank.com/index.xml",
+    showDescription: true,
     language: "ko",
   },
   {
@@ -197,23 +149,25 @@ const FEEDS: readonly Feed[] = [
     language: "ko",
   },
   {
-    title: "카카오엔터프라이즈",
-    url: "https://tech.kakaoenterprise.com/rss",
-    language: "ko",
-  },
-  {
     title: "카카오엔터테인먼트 FE",
     url: "https://fe-developers.kakaoent.com/rss.xml",
     language: "ko",
   },
   {
+    title: "카카오엔터프라이즈",
+    url: "https://tech.kakaoenterprise.com/rss",
+    language: "ko",
+  },
+  {
     title: "카카오페이",
     url: "https://tech.kakaopay.com/rss",
+    showDescription: true,
     language: "ko",
   },
   {
     title: "컬리",
     url: "http://thefarmersfront.github.io/feed.xml",
+    showDescription: true,
     language: "ko",
   },
   {
@@ -227,14 +181,19 @@ const FEEDS: readonly Feed[] = [
     language: "ko",
   },
   {
-    title: "티빙",
-    url: "https://medium.com/feed/tving-team",
-    language: "ko",
-  },
-  {
     title: "토스",
     url: "https://toss.tech/rss.xml",
     showDescription: true,
+    language: "ko",
+  },
+  {
+    title: "티맵모빌리티",
+    url: "https://brunch.co.kr/rss/@@dsaj",
+    language: "ko",
+  },
+  {
+    title: "티빙",
+    url: "https://medium.com/feed/tving-team",
     language: "ko",
   },
   {
@@ -253,40 +212,25 @@ const FEEDS: readonly Feed[] = [
     language: "ko",
   },
   {
+    title: "Airbnb",
+    url: "https://medium.com/feed/airbnb-engineering",
+    language: "en",
+  },
+  {
+    title: "AWS",
+    url: "https://aws.amazon.com/ko/blogs/tech/feed",
+    language: "ko",
+  },
+  {
     title: "AWS Architecture",
     url: "https://aws.amazon.com/blogs/architecture/feed",
     showDescription: true,
     language: "en",
   },
   {
-    title: "PRND",
-    url: "https://medium.com/feed/prnd",
-    language: "ko",
-  },
-  {
     title: "Cloudflare",
     url: "https://blog.cloudflare.com/tag/developers/rss",
     showDescription: true,
-    language: "en",
-  },
-  {
-    title: "Airbnb",
-    url: "https://medium.com/feed/airbnb-engineering",
-    language: "en",
-  },
-  {
-    title: "Spotify",
-    url: "https://engineering.atspotify.com/feed",
-    language: "en",
-  },
-  {
-    title: "Stack Overflow",
-    url: "https://stackoverflow.blog/engineering/feed",
-    language: "en",
-  },
-  {
-    title: "React",
-    url: "https://react.dev/rss.xml",
     language: "en",
   },
   {
@@ -300,14 +244,75 @@ const FEEDS: readonly Feed[] = [
     language: "en",
   },
   {
+    title: "GS리테일",
+    url: "https://gsretail.tistory.com/rss",
+    language: "ko",
+  },
+  {
+    title: "LY Corporation",
+    url: "https://techblog.lycorp.co.jp/ko/feed/index.xml",
+    language: "ko",
+  },
+  {
     title: "MDN",
     url: "https://developer.mozilla.org/en-US/blog/rss.xml",
     showDescription: true,
     language: "en",
   },
   {
+    title: "NDS",
+    url: "https://tech.cloud.nongshim.co.kr/feed",
+    language: "ko",
+  },
+  {
     title: "Netflix",
     url: "https://netflixtechblog.com/feed",
+    language: "en",
+  },
+  {
+    title: "NHN Cloud",
+    url: "https://meetup.nhncloud.com/rss",
+    language: "ko",
+  },
+  {
+    title: "PRND",
+    url: "https://medium.com/feed/prnd",
+    language: "ko",
+  },
+  {
+    title: "pxd",
+    url: "https://pxdstory.tistory.com/rss",
+    language: "ko",
+  },
+  {
+    title: "React",
+    url: "https://react.dev/rss.xml",
+    showDescription: true,
+    language: "en",
+  },
+  {
+    title: "SK C&C",
+    url: "https://engineering-skcc.github.io/feed.xml",
+    language: "ko",
+  },
+  {
+    title: "SK플래닛",
+    url: "https://techtopic.skplanet.com/rss.xml",
+    language: "ko",
+  },
+  {
+    title: "Spotify",
+    url: "https://engineering.atspotify.com/feed",
+    language: "en",
+  },
+  {
+    title: "SSG",
+    url: "https://medium.com/feed/ssgtech",
+    language: "ko",
+  },
+  {
+    title: "Stack Overflow",
+    url: "https://stackoverflow.blog/engineering/feed",
     language: "en",
   },
 ] as const;
