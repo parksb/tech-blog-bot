@@ -255,7 +255,7 @@ async function fetchNew(db: DB) {
   }
 }
 
-async function publishNext(db: DB, session: Session<any>) {
+async function publishNext(db: DB, session: Session<void>) {
   if (queue.length === 0) return;
 
   const x = queue.shift();
