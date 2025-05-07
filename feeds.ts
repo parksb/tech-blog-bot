@@ -59,7 +59,7 @@ const FEEDS: readonly Feed[] = [
   },
   {
     title: "리디",
-    url: "https://ridicorp.com/feed",
+    url: "https://ridicorp.com/story-category/tech-blog/rss",
     language: "ko",
   },
   {
