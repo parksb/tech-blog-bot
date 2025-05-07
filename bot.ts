@@ -3,7 +3,6 @@ import { DB } from "https://deno.land/x/sqlite/mod.ts";
 import { parseFeed } from "https://deno.land/x/rss/mod.ts";
 import { DenoKvMessageQueue, DenoKvStore } from "@fedify/fedify/x/denokv";
 import { createBot, link, mention, Session, text } from "@fedify/botkit";
-import FEEDS from "./feeds.ts";
 
 const SERVER_NAME = Deno.env.get("SERVER_NAME");
 if (!SERVER_NAME) {
@@ -13,6 +12,13 @@ if (!SERVER_NAME) {
 
 const SQLITE_PATH = "./data/data.db";
 const KV_PATH = "./data/kv";
+
+type RawFeed = {
+  title: string;
+  url: string;
+  showDescription?: boolean;
+  language: string;
+}
 
 interface Feed {
   url: string;
@@ -76,8 +82,22 @@ function openDb(): DB {
   return db;
 }
 
-function seedFeeds(db: DB) {
-  const feeds = FEEDS.map(
+async function fetchFeeds(): Promise<RawFeed[]> {
+  const URL =
+    "https://raw.githubusercontent.com/parksb/tech-blog-bot/refs/heads/main/feeds.json";
+
+  const res = await fetch(URL);
+  if (!res.ok) {
+    throw new Error(`Failed to fetch feeds: ${res.status} ${res.statusText}`);
+  }
+
+  return res.json();
+}
+
+async function seedFeeds(db: DB) {
+  const rawFeeds = await fetchFeeds();
+
+  const feeds = rawFeeds.map(
     (x) => [x.title, x.url, x.showDescription ?? false, x.language],
   );
 
